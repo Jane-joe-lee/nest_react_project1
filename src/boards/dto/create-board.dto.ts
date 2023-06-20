@@ -1,7 +1,7 @@
 import { PickType } from "@nestjs/swagger";
 import { Board } from "../board.entity";
 
-export class CreateBoardDto extends PickType(Board, ['title', 'description', 'attachedFile', 'status', 'parentId'] as const ) {
+export class CreateBoardDto extends PickType(Board, ['type', 'title', 'description', 'attachedFile', 'status', 'parentId'] as const ) {
     /*
     @ApiProperty({
         example: '[공지사항] 점검 안내',

@@ -8,7 +8,7 @@ import {
     UpdateDateColumn,
     OneToMany
 } from "typeorm";
-import { BoardStatus } from "./board-status.enum";
+import { BoardStatus, BoardType } from "./boards.default_type";
 import { User } from "../auth/entity/user.entity";
 import { ApiProperty } from "@nestjs/swagger";
 import {IsNotEmpty, IsNumber, IsString} from "class-validator";
@@ -40,6 +40,14 @@ export class Board extends BaseEntity {
     subBoards: Board[]
 
     @ApiProperty({
+        example: BoardType.NOTICE,
+        description: '게시물 구분'
+    })
+    @IsNotEmpty()
+    @Column({ default: BoardType.NOTICE, comment: '게시물 구분' })
+    type: BoardType;
+
+    @ApiProperty({
         example: '[공지사항] 점검 안내',
         description: '게시물 제목',
         required: true
@@ -47,7 +55,6 @@ export class Board extends BaseEntity {
     @IsNotEmpty()
     @Column({ comment: '게시물제목' })
     title: string;
-
 
     @ApiProperty({
         example: '점검 안내입니다.',

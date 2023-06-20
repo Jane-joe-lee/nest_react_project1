@@ -11,7 +11,7 @@ import {
     ValidationPipe
 } from '@nestjs/common';
 import { BoardsService } from "./boards.service";
-import { BoardStatus } from "./board-status.enum";
+import { BoardStatus } from "./boards.default_type";
 import { CreateBoardDto } from "./dto/create-board.dto";
 import { BoardStatusValidationPipe } from "./pipes/board-status-validation.pipe";
 import { Board } from "./board.entity";
@@ -41,10 +41,8 @@ export class BoardsController {
     createBoard(
         @Body() createBoardDto: CreateBoardDto,
         @GetUser() user: User,
-        @UploadedFiles(
-            new ParseFilePipeBuilder().addFileTypeValidator({fileType: 'jpeg|png|jpg|gif'}).build({errorHttpStatusCode: HttpStatus.UNPROCESSABLE_ENTITY})
-        ) files: Array<Express.Multer.File>
-    ): Promise<Board> {
+        @UploadedFiles() files: Array<Express.Multer.File>
+    ): Promise<Board> { // Promise<Board>
         return this.boardsService.createBoard(createBoardDto, user, 'boards', files);
     }
 
@@ -90,9 +88,7 @@ export class BoardsController {
         @Param('id', ParseIntPipe) id,
         @Body() createBoardDto: CreateBoardDto,
         @GetUser() user: User,
-        @UploadedFiles(
-            new ParseFilePipeBuilder().addFileTypeValidator({fileType: 'jpeg|png|jpg|gif'}).build({errorHttpStatusCode: HttpStatus.UNPROCESSABLE_ENTITY})
-        ) files: Array<Express.Multer.File>
+        @UploadedFiles() files: Array<Express.Multer.File>
     ): Promise<Board> {
         return this.boardsService.updateBoard(id, createBoardDto, user, 'boards', files);
     }

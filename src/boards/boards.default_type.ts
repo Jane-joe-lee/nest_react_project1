@@ -10,3 +10,8 @@ export enum BoardStatus {
     PUBLIC = 'PUBLIC',
     PRIVATE = 'PRIVATE'
 }
+
+export enum BoardType {
+    NOTICE = 'notice',
+    FREE = 'free'
+}

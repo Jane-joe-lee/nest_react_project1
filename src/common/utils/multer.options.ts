@@ -3,7 +3,7 @@ import * as multer from 'multer';
 import * as path from 'path';
 import * as fs from 'fs';
 import { MulterOptions } from '@nestjs/platform-express/multer/interfaces/multer-options.interface';
-import { BadRequestException } from "@nestjs/common";
+import {BadRequestException, HttpException, HttpStatus, NotFoundException} from "@nestjs/common";
 
 
 
@@ -62,11 +62,12 @@ const fileFilter = (req, file, cb) => {
     }
 }
 
+
 export const multerOptions = (folder: string) => {
     const result: MulterOptions = {
         storage: storage(folder),
         limits: limits,
-        //fileFilter: fileFilter
+        fileFilter: fileFilter
     };
     return result;
 };

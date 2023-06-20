@@ -1,7 +1,7 @@
 import { DataSource, Repository } from "typeorm"; // EntityRepository,
 import { Board } from "./board.entity";
 import { CreateBoardDto } from "./dto/create-board.dto";
-import { BoardStatus } from "./board-status.enum";
+import { BoardStatus, BoardType } from "./boards.default_type";
 import { InjectRepository } from "@nestjs/typeorm";
 import { User } from "../auth/entity/user.entity";
 import {InternalServerErrorException, NotFoundException} from "@nestjs/common";
@@ -17,8 +17,8 @@ export class BoardRepository extends Repository<Board> {
     }
 
     async createBoard(createBoardDto: CreateBoardDto, user: User, folder: string, files: Array<Express.Multer.File>): Promise<Board> {
-        const {title, description, status, parentId} = createBoardDto;
-        const boardData: Partial<Board> = {title, description, status, user, parentId};
+        const { type, title, description, status, parentId } = createBoardDto;
+        const boardData: Partial<Board> = { type, title, description, status, user, parentId };
 
         if ( files ) {
             const new_files = files.map(item => folder + '/' + item.filename);
@@ -66,7 +66,7 @@ export class BoardRepository extends Repository<Board> {
 
     async updateBoard(id: number, createBoardDto: CreateBoardDto, user: User, folder: string, files: Array<Express.Multer.File>): Promise<Board> {
         const board = await this.getBoardById(id, 'n');
-        const {title, description, status} = createBoardDto;
+        const { title, description, status} = createBoardDto;
         board.title = title;
         board.description = description;
         board.status = status;

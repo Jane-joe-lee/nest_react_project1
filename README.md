@@ -1,4 +1,4 @@
-# nest_react_pro1
+# nest_react_project1
 * nest.js, react로 만든 연습용 프로젝트
 
 * 게시판 기능 추가 예정
@@ -8,8 +8,10 @@
 ### 환경
 * nest.js ( port : 5001 )
 * react ( port : 3000, directory: client1 )
+* Database : PostgreSQL
 * API : axios
 * image : proxy ( http://localhost:5001/media/.../a.png -> http://localhost:3000/media/.../a.png )
+* 기타 : redux
 
 ---
 ### 실행
@@ -37,7 +39,7 @@ CORS_ORIGIN = 'http://localhost:3000'
 JWT_SECRET = 'secret key'
 JWT_EXPIRES = expires(only number)
 
-SWAGGER_USER = 'swagger id';
+SWAGGER_USER = 'swagger id'
 SWAGGER_PASSWORD = 'swagger pw'
 
 DB_TYPE = 'postgres';
