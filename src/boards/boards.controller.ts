@@ -1,28 +1,20 @@
 import {
-    Body,
-    Controller,
-    Delete, FileTypeValidator,
-    Get, HttpStatus, MaxFileSizeValidator,
-    Param, ParseFilePipe, ParseFilePipeBuilder,
-    ParseIntPipe,
-    Patch,
-    Post, UploadedFile, UploadedFiles, UseFilters, UseGuards, UseInterceptors,
-    UsePipes,
-    ValidationPipe
-} from '@nestjs/common';
+    Body, Get, Post, Param, Patch, Delete, Controller,
+    ParseIntPipe, UploadedFiles, UseGuards, UseInterceptors, UsePipes, ValidationPipe
+} from '@nestjs/common'; // HttpStatus, MaxFileSizeValidator, ParseFilePipe, ParseFilePipeBuilder, FileTypeValidator, UploadedFile,UseFilters,
 import { BoardsService } from "./boards.service";
 import { BoardStatus } from "./boards.default_type";
 import { CreateBoardDto } from "./dto/create-board.dto";
+import { SearchBoardDto } from "./dto/search-board.dto";
 import { BoardStatusValidationPipe } from "./pipes/board-status-validation.pipe";
 import { Board } from "./board.entity";
 import { AuthGuard } from "@nestjs/passport";
-import { ApiBody, ApiOkResponse, ApiOperation, ApiParam, ApiResponse, ApiTags } from "@nestjs/swagger";
+import { ApiBody, ApiOperation, ApiParam, ApiResponse, ApiTags } from "@nestjs/swagger";
 import { GetUser } from "../auth/get-user.decorator";
 import { User } from "../auth/entity/user.entity";
 import { BoardResponseDto } from "./dto/board.response.dto";
-import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
+import { FilesInterceptor } from '@nestjs/platform-express'; // FileInterceptor
 import { multerOptions } from "../common/utils/multer.options";
-
 //import { CreateSwaggerDto } from "./dto/create-swagger.dto";
 
 @ApiTags('boards')
@@ -33,7 +25,7 @@ export class BoardsController {
     @ApiOperation( { summary: '게시물 생성(인증 필수)'} )
     //@ApiOkResponse({description: 'Success'})
     //@ApiResponse({status: 401, description: 'unauthorized'})
-    @Post()
+    @Post('/create')
     @UsePipes(ValidationPipe)
     //@UseInterceptors(FileInterceptor('file', multerOptions('boards')))
     @UseInterceptors(FilesInterceptor('files', 10, multerOptions('boards')))
@@ -42,7 +34,7 @@ export class BoardsController {
         @Body() createBoardDto: CreateBoardDto,
         @GetUser() user: User,
         @UploadedFiles() files: Array<Express.Multer.File>
-    ): Promise<Board> { // Promise<Board>
+    ): Promise<boolean> { // Promise<Board>
         return this.boardsService.createBoard(createBoardDto, user, 'boards', files);
     }
 
@@ -57,7 +49,7 @@ export class BoardsController {
     @ApiParam({name: 'id', type: 'number'})
     @Delete('/:id')
     @UseGuards(AuthGuard())
-    deleteBoard(@Param('id', ParseIntPipe) id, @GetUser() user: User): Promise<void> {
+    deleteBoard(@Param('id', ParseIntPipe) id, @GetUser() user: User): Promise<boolean> {
         return this.boardsService.deleteBoard(id, user);
     }
 
@@ -66,7 +58,7 @@ export class BoardsController {
     //@ApiBody({description: '', type: CreateBoardDto})
     @Patch('/:id/status')
     @UseGuards(AuthGuard())
-    updateBoardStatus(@Param('id', ParseIntPipe) id, @Body('status', BoardStatusValidationPipe) status: BoardStatus) {
+    updateBoardStatus(@Param('id', ParseIntPipe) id, @Body('status', BoardStatusValidationPipe) status: BoardStatus): Promise<boolean> {
         return this.boardsService.updateBoardStatus(id, status);
     }
 
@@ -74,7 +66,7 @@ export class BoardsController {
     @ApiParam({name: 'id', type: 'number'})
     //@ApiBody({description: '+/-', type: ''})
     @Patch('/:id/like')
-    updateBoardLike(@Param('id', ParseIntPipe) id, @Body('like') like: string): Promise<Board> {
+    updateBoardLike(@Param('id', ParseIntPipe) id, @Body('like') like: string): Promise<boolean> {
         return this.boardsService.updateBoardLike(id, like);
     }
 
@@ -89,26 +81,28 @@ export class BoardsController {
         @Body() createBoardDto: CreateBoardDto,
         @GetUser() user: User,
         @UploadedFiles() files: Array<Express.Multer.File>
-    ): Promise<Board> {
+    ): Promise<boolean> {
         return this.boardsService.updateBoard(id, createBoardDto, user, 'boards', files);
     }
 
 
     @ApiOperation( { summary: '모든 게시물 확인'} )
     @ApiResponse({status: 201, description: 'Success', type: BoardResponseDto})
-    @Get()
-    getAllBoard(): Promise<Board[]> {
-        return this.boardsService.getAllBoards();
+    @ApiBody({ description: '검색어(제목)', type: SearchBoardDto })
+    @Post('list')
+    getAllBoard(@Body() body: SearchBoardDto): Promise<Board[]> {
+        return this.boardsService.getAllBoards(body);
     }
-    /*
+
     @ApiOperation( { summary: '나의 모든 게시물 확인(인증 필수)' } )
     @ApiResponse({status: 201, description: 'Success', type: BoardResponseDto})
-    @Get()
+    @ApiBody({ description: '검색어(제목)', type: SearchBoardDto })
+    @Post('/myList')
     @UseGuards(AuthGuard())
-    getMyAllBoards(@GetUser() user: User): Promise<Board[]> {
-        return this.boardsService.getMyAllBoards(user);
+    getMyAllBoards(@Body() body: SearchBoardDto, @GetUser() user: User): Promise<Board[]> {
+        return this.boardsService.getMyAllBoards(body, user);
     }
-    */
+
 
     /*
     @Get()

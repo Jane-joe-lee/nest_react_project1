@@ -1,6 +1,6 @@
 import {
     BaseEntity,
-    Column,
+    Column, JoinColumn,
     CreateDateColumn,
     Entity,
     OneToMany,
@@ -53,8 +53,12 @@ export class User extends BaseEntity {
     level: number;
 
     //* eager:true => user 가져올 때 게시물도 같이 가져오도록
-    @OneToMany(type => Board, board => board.user, {eager: true})
+    @OneToMany(type => Board, board => board.user, {eager: false})
     boards: Board[]
+
+    // 추가(board 리턴시 userId도 보이도록), inverse side로 userId와 관계 매핑
+    @JoinColumn({ name: 'userId' })
+    user: User;
 
     @ApiProperty({
         example: 'myprofile.png',

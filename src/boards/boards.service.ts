@@ -1,10 +1,11 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { BoardStatus } from "./boards.default_type";
 import { CreateBoardDto } from "./dto/create-board.dto";
 import { BoardRepository } from "./board.repository";
 import { Board } from "./board.entity";
 import { User } from "../auth/entity/user.entity";
-import {InjectRepository } from "@nestjs/typeorm";
+import { SearchBoardDto } from "./dto/search-board.dto";
+//import {InjectRepository } from "@nestjs/typeorm";
 
 @Injectable()
 export class BoardsService {
@@ -15,7 +16,7 @@ export class BoardsService {
         private boardRepository: BoardRepository
     ){}
 
-    createBoard(createBoardDto: CreateBoardDto, user: User, folder: string, files: Array<Express.Multer.File>): Promise<Board> {
+    createBoard(createBoardDto: CreateBoardDto, user: User, folder: string, files: Array<Express.Multer.File>): Promise<boolean> {
         return this.boardRepository.createBoard(createBoardDto, user, folder, files);
     }
 
@@ -24,28 +25,28 @@ export class BoardsService {
         return board;
     }
 
-    deleteBoard(id: number, user: User): Promise<void> {
+    deleteBoard(id: number, user: User): Promise<boolean> {
         return this.boardRepository.deleteBoard(id, user);
     }
 
-    updateBoardStatus(id: number, status: BoardStatus): Promise<Board> {
+    updateBoardStatus(id: number, status: BoardStatus): Promise<boolean> {
         return this.boardRepository.updateBoardStatus(id, status);
     }
 
-    updateBoardLike(id: number, like: string): Promise<Board> {
+    updateBoardLike(id: number, like: string): Promise<boolean> {
         return this.boardRepository.updateBoardLike(id, like);
     }
 
-    updateBoard(id: number, createBoardDto: CreateBoardDto, user: User, folder: string, files: Array<Express.Multer.File>): Promise<Board> {
+    updateBoard(id: number, createBoardDto: CreateBoardDto, user: User, folder: string, files: Array<Express.Multer.File>): Promise<boolean> {
         return this.boardRepository.updateBoard(id, createBoardDto, user, folder, files);
     }
 
-    getAllBoards(): Promise<Board[]> {
-        return this.boardRepository.getAllBoards();
+    getAllBoards(body: SearchBoardDto): Promise<Board[]> {
+        return this.boardRepository.getAllBoards(body);
     }
 
-    getMyAllBoards(user: User): Promise<Board[]> {
-        return this.boardRepository.getMyAllBoards(user);
+    getMyAllBoards(body: SearchBoardDto, user: User): Promise<Board[]> {
+        return this.boardRepository.getMyAllBoards(body, user);
     }
 
     /*//private boards: Board[] = [];

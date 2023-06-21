@@ -1,6 +1,6 @@
 import {
     BaseEntity,
-    Column,
+    Column, JoinColumn,
     CreateDateColumn,
     Entity,
     ManyToOne,
@@ -11,8 +11,7 @@ import {
 import { BoardStatus, BoardType } from "./boards.default_type";
 import { User } from "../auth/entity/user.entity";
 import { ApiProperty } from "@nestjs/swagger";
-import {IsNotEmpty, IsNumber, IsString} from "class-validator";
-import {JoinColumn} from "typeorm/browser";
+import { IsNotEmpty, IsNumber } from "class-validator";
 
 @Entity()
 export class Board extends BaseEntity {
@@ -74,7 +73,12 @@ export class Board extends BaseEntity {
     status: BoardStatus;
 
     @ManyToOne(type => User, user => user.boards, {eager: false})
+    @JoinColumn({ name: 'userId' }) // 추가(board 리턴시 userId도 보이도록)
     user: User;
+
+    // 추가(board 리턴시 userId도 보이도록)
+    @Column({ comment: '사용자ID', nullable: true }) // nullable: true로 설정
+    userId: number; // 추가: userId 컬럼 정의
 
     @ApiProperty({
         example: 1,

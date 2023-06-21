@@ -1,12 +1,13 @@
 import { DataSource, Repository } from "typeorm"; // EntityRepository,
 import { Board } from "./board.entity";
 import { CreateBoardDto } from "./dto/create-board.dto";
-import { BoardStatus, BoardType } from "./boards.default_type";
+import { BoardStatus } from "./boards.default_type"; // BoardType
 import { InjectRepository } from "@nestjs/typeorm";
 import { User } from "../auth/entity/user.entity";
-import {InternalServerErrorException, NotFoundException} from "@nestjs/common";
+import { InternalServerErrorException, NotFoundException } from "@nestjs/common";
 import * as path from 'path';
 import { existsSync, unlinkSync } from "fs";
+import { SearchBoardDto } from "./dto/search-board.dto";
 
 //@EntityRepository(Board)
 export class BoardRepository extends Repository<Board> {
@@ -16,7 +17,7 @@ export class BoardRepository extends Repository<Board> {
         // super(Board, dataSource.createEntityManager())
     }
 
-    async createBoard(createBoardDto: CreateBoardDto, user: User, folder: string, files: Array<Express.Multer.File>): Promise<Board> {
+    async createBoard(createBoardDto: CreateBoardDto, user: User, folder: string, files: Array<Express.Multer.File>): Promise<boolean> {
         const { type, title, description, status, parentId } = createBoardDto;
         const boardData: Partial<Board> = { type, title, description, status, user, parentId };
 
@@ -26,9 +27,9 @@ export class BoardRepository extends Repository<Board> {
             //const filename = `${folder}/${file.filename}`;
             boardData.attachedFile = filename;
         }
-        const board = this.create(boardData);
+        let board = this.create(boardData);
         await this.save(board);
-        return board;
+        return true;
     }
 
     async getBoardById(id: number, update: string): Promise<Board> {
@@ -45,26 +46,26 @@ export class BoardRepository extends Repository<Board> {
         return found;
     }
 
-    async updateBoardStatus(id: number, status: BoardStatus): Promise<Board> {
+    async updateBoardStatus(id: number, status: BoardStatus): Promise<boolean> {
         const board = await this.getBoardById(id, 'n');
         board.status =status;
         await this.save(board);
-        return board;
+        return true;
     }
 
-    async updateBoardLike(id: number, like: string): Promise<Board> {
+    async updateBoardLike(id: number, like: string): Promise<boolean> {
         const board = await this.getBoardById(id, 'n');
-        if ( like === '+' ) {
+        if ( !like || like === '+' ) {
             board.likeCnt += 1;
         } else if ( like === '-'  && board.likeCnt > 0 ) {
             board.likeCnt -= 1;
         }
         await this.save(board);
-        return board;
+        return true;
     }
 
 
-    async updateBoard(id: number, createBoardDto: CreateBoardDto, user: User, folder: string, files: Array<Express.Multer.File>): Promise<Board> {
+    async updateBoard(id: number, createBoardDto: CreateBoardDto, user: User, folder: string, files: Array<Express.Multer.File>): Promise<boolean> {
         const board = await this.getBoardById(id, 'n');
         const { title, description, status} = createBoardDto;
         board.title = title;
@@ -87,7 +88,7 @@ export class BoardRepository extends Repository<Board> {
         }
 
         await this.save(board);
-        return board;
+        return true;
     }
 
     async deleteFiles(filename: string): Promise<void> {
@@ -101,18 +102,33 @@ export class BoardRepository extends Repository<Board> {
         }
     }
 
-    async getAllBoards(): Promise<Board[]> {
-        return await this.find();
+    async getAllBoards(body: SearchBoardDto): Promise<Board[]> {
+        if ( body.searchType && body.searchWords ) {
+            const query = this.createQueryBuilder('board');
+            if ( body.searchType == 'title' ) {
+                query.where('board.title LIKE :title', { title: `%${body.searchWords}%` })
+            } else if ( body.searchType == 'username' ) {
+                query.leftJoin('board.user', 'user').andWhere('user.username = :username', { username: body.searchWords })
+            }
+            const boards = await query.getMany();
+            return boards;
+        } else {
+            return await this.find();
+        }
+
     }
 
-    async getMyAllBoards(user: User): Promise<Board[]> {
+    async getMyAllBoards(body: SearchBoardDto, user: User): Promise<Board[]> {
         const query = this.createQueryBuilder('board');
-        query.where('board.userId = :userId', { userId: user.id})
+        query.where('board.userId = :userId', { userId: user.id })
+        if ( body.searchType == 'title' ) {
+            query.andWhere('board.title LIKE :title', { title: `%${body.searchWords}%` })
+        }
         const boards = await query.getMany();
         return boards;
     }
 
-    async deleteBoard(id: number, user: User): Promise<void> {
+    async deleteBoard(id: number, user: User): Promise<boolean> {
         try {
             const result = await this.delete({
                 id,
@@ -121,6 +137,7 @@ export class BoardRepository extends Repository<Board> {
             if (result.affected === 0) {
                 throw new NotFoundException(`Can't find Board with id ${id}`);
             }
+            return true;
         } catch (error) {
             if ( error.code === '23503' ) {
                 throw new InternalServerErrorException(`댓글이 있어서 삭제할 수 없습니다.`)
