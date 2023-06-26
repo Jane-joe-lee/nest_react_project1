@@ -1,7 +1,7 @@
 import { DataSource, Repository } from "typeorm"; // EntityRepository,
 import { Board } from "./board.entity";
 import { CreateBoardDto } from "./dto/create-board.dto";
-import { BoardStatus } from "./boards.default_type"; // BoardType
+import { BoardStatus, BoardType } from "./boards.default_type";
 import { InjectRepository } from "@nestjs/typeorm";
 import { User } from "../auth/entity/user.entity";
 import { InternalServerErrorException, NotFoundException } from "@nestjs/common";
@@ -32,29 +32,44 @@ export class BoardRepository extends Repository<Board> {
         return true;
     }
 
-    async getBoardById(id: number, update: string): Promise<Board> {
-        const found = await this.findOneBy({id: id});
+    // 게시물 조회용
+    async getBoardById(id: number): Promise<Board> {
+
+        const query = this.createQueryBuilder('board')
+            .leftJoin('board.user', 'user')
+            .select(['board', 'user.username'])
+            .where('board.id = :id', { id })
+
+        query.update().set({ hitCnt: () => 'hitCnt + 1' }).execute();
+
+        const found = await query.getOne()
 
         if ( !found ) {
             throw new NotFoundException(`Can't find Board with id ${id}`);
         }
 
-        if ( update == 'y' ) {
-            found.hitCnt += 1;
-            await this.save(found);
+        return found;
+    }
+
+    // 현재 repository에서 참조할 때 쓰는 게시판 정보만 리턴하는 용도
+    async getOnlyBoardById(id: number): Promise<Board> {
+        const found = await this.findOneBy({id: id} );
+        if ( !found ) {
+            throw new NotFoundException(`Can't find Board with id ${id}`);
         }
         return found;
     }
 
+
     async updateBoardStatus(id: number, status: BoardStatus): Promise<boolean> {
-        const board = await this.getBoardById(id, 'n');
+        const board = await this.getOnlyBoardById(id);
         board.status =status;
         await this.save(board);
         return true;
     }
 
     async updateBoardLike(id: number, like: string): Promise<boolean> {
-        const board = await this.getBoardById(id, 'n');
+        const board = await this.getOnlyBoardById(id);
         if ( !like || like === '+' ) {
             board.likeCnt += 1;
         } else if ( like === '-'  && board.likeCnt > 0 ) {
@@ -66,8 +81,8 @@ export class BoardRepository extends Repository<Board> {
 
 
     async updateBoard(id: number, createBoardDto: CreateBoardDto, user: User, folder: string, files: Array<Express.Multer.File>): Promise<boolean> {
-        const board = await this.getBoardById(id, 'n');
-        const { title, description, status} = createBoardDto;
+        const board = await this.getOnlyBoardById(id);
+        const { title, description, status } = createBoardDto;
         board.title = title;
         board.description = description;
         board.status = status;
@@ -102,47 +117,91 @@ export class BoardRepository extends Repository<Board> {
         }
     }
 
-    async getAllBoards(body: SearchBoardDto): Promise<Board[]> {
-        if ( body.searchType && body.searchWords ) {
-            const query = this.createQueryBuilder('board');
-            if ( body.searchType == 'title' ) {
-                query.where('board.title LIKE :title', { title: `%${body.searchWords}%` })
-            } else if ( body.searchType == 'username' ) {
-                query.leftJoin('board.user', 'user').andWhere('user.username = :username', { username: body.searchWords })
+    async getAllBoards(data: SearchBoardDto, type: BoardType): Promise<Board[]> {
+
+        const types = type ?? BoardType.NOTICE; // 게시판 유형
+
+        const query = this.createQueryBuilder('board');
+        query.where('board.type = :type', { type: types })
+
+        if ( data.searchType && data.searchWords ) {
+            if (data.searchType == 'title') {
+                query.andWhere('board.title LIKE :title', {title: `%${data.searchWords}%`})
+            } else if (data.searchType == 'username') {
+                query.leftJoin('board.user', 'user').andWhere('user.username = :username', {username: data.searchWords})
             }
-            const boards = await query.getMany();
-            return boards;
-        } else {
-            return await this.find();
         }
+
+        // 페이지 설정
+        const page = data.page ?? 0;
+        const pageCnt = data.pageCnt ?? 0; // 한페이지당 보여줄 게시물수
+        if ( page > 0 && pageCnt > 0 ) {
+            const skip = (page - 1) * pageCnt; // 건너뛸 레코드 수
+            if (skip > 0) {
+                query.skip(skip);
+            }
+            query.take(pageCnt);
+        }
+
+        // username 추가
+        let boards;
+        if (data.searchType == 'username') {
+            boards = await query.select(['board', 'user.username']).getMany();
+        } else {
+            boards = await query.leftJoinAndSelect('board.user', 'user').select(['board', 'user.username']).getMany();
+        }
+
+        return boards;
 
     }
 
-    async getMyAllBoards(body: SearchBoardDto, user: User): Promise<Board[]> {
+    /*
+    async getMyAllBoards(data: SearchBoardDto, user: User): Promise<Board[]> {
         const query = this.createQueryBuilder('board');
         query.where('board.userId = :userId', { userId: user.id })
-        if ( body.searchType == 'title' ) {
-            query.andWhere('board.title LIKE :title', { title: `%${body.searchWords}%` })
+        if ( data.searchType == 'title' ) {
+            query.andWhere('board.title LIKE :title', { title: `%${data.searchWords}%` })
         }
         const boards = await query.getMany();
         return boards;
     }
+    */
 
     async deleteBoard(id: number, user: User): Promise<boolean> {
+
+        let result = false;
         try {
-            const result = await this.delete({
-                id,
-                user: {id: user.id}
-            });
-            if (result.affected === 0) {
-                throw new NotFoundException(`Can't find Board with id ${id}`);
+            const board = await this.getOnlyBoardById(id);
+
+            if (board.userId === user.id) { // 작성자 본인만 삭제할 수 있음
+
+                const delResult = await this.delete({ id: board.id });
+                if (delResult.affected !== 0) {
+                    result = true;
+
+                    //* 파일이 있을 경우 삭제
+                    if (board.attachedFile !== '') {
+                        const tmpFiles = board.attachedFile.split('|');
+                        for (const item of tmpFiles) {
+                            this.deleteFiles(item);
+                        }
+                    }
+                }
+
+            } else {
+                throw new NotFoundException(`작정자 본인만 삭제할 수 있습니다.`);
             }
-            return true;
+
         } catch (error) {
             if ( error.code === '23503' ) {
                 throw new InternalServerErrorException(`댓글이 있어서 삭제할 수 없습니다.`)
+            } else {
+                throw error;
             }
         }
+
+        return result;
+
     }
 
 }

@@ -1,15 +1,16 @@
 import {
-    Body, Get, Post, Param, Patch, Delete, Controller,
+    Body, Get, Post, Param, Patch, Delete, Controller, Query,
     ParseIntPipe, UploadedFiles, UseGuards, UseInterceptors, UsePipes, ValidationPipe
 } from '@nestjs/common'; // HttpStatus, MaxFileSizeValidator, ParseFilePipe, ParseFilePipeBuilder, FileTypeValidator, UploadedFile,UseFilters,
 import { BoardsService } from "./boards.service";
-import { BoardStatus } from "./boards.default_type";
+import { BoardStatus, BoardType } from "./boards.default_type";
 import { CreateBoardDto } from "./dto/create-board.dto";
 import { SearchBoardDto } from "./dto/search-board.dto";
 import { BoardStatusValidationPipe } from "./pipes/board-status-validation.pipe";
+import { BoardTypeValidationPipe } from "./pipes/board-type-validation.pipe";
 import { Board } from "./board.entity";
 import { AuthGuard } from "@nestjs/passport";
-import { ApiBody, ApiOperation, ApiParam, ApiResponse, ApiTags } from "@nestjs/swagger";
+import { ApiOperation, ApiParam, ApiResponse, ApiTags } from "@nestjs/swagger";
 import { GetUser } from "../auth/get-user.decorator";
 import { User } from "../auth/entity/user.entity";
 import { BoardResponseDto } from "./dto/board.response.dto";
@@ -88,21 +89,26 @@ export class BoardsController {
 
     @ApiOperation( { summary: '모든 게시물 확인'} )
     @ApiResponse({status: 201, description: 'Success', type: BoardResponseDto})
-    @ApiBody({ description: '검색어(제목)', type: SearchBoardDto })
-    @Post('list')
-    getAllBoard(@Body() body: SearchBoardDto): Promise<Board[]> {
-        return this.boardsService.getAllBoards(body);
+    @Get('/list/:type')
+    getAllBoard(
+        @Param('type', BoardTypeValidationPipe) type: BoardType,
+        @Query() data: SearchBoardDto,
+    ): Promise<Board[]> {
+        return this.boardsService.getAllBoards(data, type);
     }
 
+    /*
     @ApiOperation( { summary: '나의 모든 게시물 확인(인증 필수)' } )
     @ApiResponse({status: 201, description: 'Success', type: BoardResponseDto})
-    @ApiBody({ description: '검색어(제목)', type: SearchBoardDto })
-    @Post('/myList')
+    //@ApiBody({ description: '검색어(제목)', type: SearchBoardDto })
+    @Get('/myList')
     @UseGuards(AuthGuard())
-    getMyAllBoards(@Body() body: SearchBoardDto, @GetUser() user: User): Promise<Board[]> {
-        return this.boardsService.getMyAllBoards(body, user);
+    getMyAllBoards(
+        @Query() data: SearchBoardDto,
+        @GetUser() user: User): Promise<Board[]> {
+        return this.boardsService.getMyAllBoards(data, user);
     }
-
+    */
 
     /*
     @Get()
