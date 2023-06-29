@@ -4,30 +4,30 @@ import { useDispatch } from "react-redux";
 import { profileImgUser, profileImgDeleteUser, getLoginInfo } from "../../../_actions/user_action";
 import HeaderPage from "../Nav/HeaderPage";
 import FooterPage from "../Nav/FooterPage";
-import { getCookies } from "../../../common/cookie";
 import { getFileMIMEType } from "../../../common/file/file";
-import { COOKIE_JWT_NAME } from "../../../common/vars/vars";
 import { MSG_COMMON_FIXED, MSG_COMMON_DELETED, MSG_COMMON_FILE_NO, MSG_COMMON_FILE_ONLYIMG } from "../../../common/vars/msg";
 import { Button, Form, Layout, Avatar, Space } from 'antd';
 import { subMenu_myPageitems } from "../../../common/menu/sider";
 import SiderPage from "../Nav/SiderPage";
 import PathBar from "../Nav/PathBar";
+import { getCookies } from "../../../common/cookie";
+import { COOKIE_JWT_NAME } from "../../../common/vars/vars";
 
 const { Content } = Layout;
 
 function ProfilePage(props) {
 
-    const dispatch = useDispatch();
     const navigate = useNavigate();
+    const dispatch = useDispatch();
     const basePath = '/users';
 
-    // 이미 로그인되지 않은 경우 페이지 이동
+
     useEffect(() => {
         const x_auth = getCookies(COOKIE_JWT_NAME) ?? '';
-        if ( !x_auth ) {
+        if (!x_auth) {
             navigate("/users/login");
         }
-    }, [navigate]);
+    }, []);
 
     const basic_img = "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png";
     const [Image, setImage] = useState(basic_img)
@@ -75,17 +75,19 @@ function ProfilePage(props) {
     }
 
     // 기존 프로필 정보 가져오기
-    dispatch(getLoginInfo()).then(response => {
-        if ( response.payload.success && response.payload.data.profile_img ) {
-            let profileImg = `/media/${response.payload.data.profile_img}`;
-            setImage(profileImg);
+    useEffect(() => {
+        dispatch(getLoginInfo()).then(response => {
+            if (response.payload.success && response.payload.data.profile_img) {
+                let profileImg = `/media/${response.payload.data.profile_img}`;
+                setImage(profileImg);
 
-            // 프로필 정보 있으면 삭제버튼 표시
-            document.getElementById('profileDelBtn').classList.remove('display_none');
-        }
-    }).catch(err => {
-        console.log(err);
-    });
+                // 프로필 정보 있으면 삭제버튼 표시
+                document.getElementById('profileDelBtn').classList.remove('display_none');
+            }
+        }).catch(err => {
+            console.log(err);
+        });
+    }, [Image]);
 
     // 프로필 삭제 처리
     const onClickProfileImgDeleteHandler = (event) => {
@@ -95,7 +97,6 @@ function ProfilePage(props) {
             if ( response.payload.success ) {
                 alert(MSG_COMMON_DELETED);
                 window.location.reload();
-                //navigate("/users/profile");
             }
         });
     }

@@ -1,16 +1,8 @@
 import React from 'react'
 import HeaderPage from "../../../components/views/Nav/HeaderPage";
 import FooterPage from "../../../components/views/Nav/FooterPage";
-//import { useNavigate } from "react-router-dom";
 
 function LandingPage(props) {
-   /* let navigate = useNavigate();
-
-    const onClickLoginHandler = () => {
-        navigate('/login');
-    }
-            <button onClick={onClickLoginHandler}>Login</button>
-    */
 
     return (
         <div>

@@ -1,9 +1,7 @@
 import React, { useEffect } from 'react';
 import { useNavigate } from "react-router-dom";
-import { getCookies } from "../../../common/cookie";
 import HeaderPage from "../Nav/HeaderPage";
 import FooterPage from "../Nav/FooterPage";
-import { COOKIE_JWT_NAME } from "../../../common/vars/vars";
 import { MSG_COMMON_FIXED, MSG_REGISTER_NOMATCH_PW, MSG_COMMON_FAILED, MSG_PW_CONFIRM_MSG, MSG_PW_NOW_MSG, MSG_LOGIN_PW_MSG } from "../../../common/vars/msg";
 import { useDispatch } from "react-redux";
 import { setUserPassword } from "../../../_actions/user_action";
@@ -11,6 +9,8 @@ import { Button, Form, Input, Layout } from 'antd';
 import { subMenu_myPageitems } from "../../../common/menu/sider";
 import SiderPage from "../Nav/SiderPage";
 import PathBar from "../Nav/PathBar";
+import { getCookies } from "../../../common/cookie";
+import { COOKIE_JWT_NAME } from "../../../common/vars/vars";
 
 const { Content } = Layout;
 
@@ -34,14 +34,14 @@ function PasswordPage(props) {
         setConfirmPassword(event.currentTarget.value);
     }
     */
-    // 이미 로그인되지 않은 경우 페이지 이동
+
+
     useEffect(() => {
         const x_auth = getCookies(COOKIE_JWT_NAME) ?? '';
-        if ( !x_auth ) {
+        if (!x_auth) {
             navigate("/users/login");
         }
-    }, [navigate]);
-
+    }, []);
 
     const onClickPasswordHandler = (values) => {
         //event.preventDefault();

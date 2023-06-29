@@ -2,12 +2,13 @@ import React, { useEffect } from 'react';
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { loginUser } from '../../../_actions/user_action';
-import { setCookies, getCookies } from "../../../common/cookie";
+import { getCookies, setCookies } from "../../../common/cookie";
 import { COOKIE_JWT_NAME } from "../../../common/vars/vars";
 import { MSG_LOGIN_FAILED, MSG_LOGIN_NOMATCH, MSG_REGISTER_SUCCESS_TITLE, MSG_REGISTER_SUCCESS, MSG_LOGIN_ID_MSG, MSG_LOGIN_PW_MSG } from "../../../common/vars/msg";
 import HeaderPage from "../Nav/HeaderPage";
 import FooterPage from "../Nav/FooterPage";
 import { Button, Form, Input, Result, Layout } from 'antd';
+
 const { Content } = Layout;
 
 function LoginPage(props) {
@@ -18,13 +19,13 @@ function LoginPage(props) {
     const dispatch = useDispatch();
     const navigate = useNavigate();
 
-    // 이미 로그인된 경우 페이지 이동
     useEffect(() => {
         const x_auth = getCookies(COOKIE_JWT_NAME) ?? '';
-        if ( x_auth ) {
+        if (x_auth) {
             navigate("/");
         }
-    }, [navigate]);
+    }, []);
+
     /*
     // antd 사용시 불필요함
     // input box에 타이핑시 onChange 이벤트가 발생해 useState를 통해 값이 바뀌고 그걸 value에 넣어줌

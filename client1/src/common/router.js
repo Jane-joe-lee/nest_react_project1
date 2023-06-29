@@ -7,7 +7,9 @@ import RegisterPage from "../components/views/Users/RegisterPage";
 import MyPage from "../components/views/Users/MyPage";
 import ProfilePage from "../components/views/Users/ProfilePage";
 import PasswordPage from "../components/views/Users/PasswordPage";
-
+import BoardsListPage from "../components/views/Boards/ListPage";
+import BoardsViewPage from "../components/views/Boards/ViewPage";
+import BoardsEditPage from "../components/views/Boards/EditPage";
 
 function Router() {
     return (
@@ -19,6 +21,10 @@ function Router() {
                 <Route path="/users/mypage" element={<MyPage />} />
                 <Route path="/users/profile" element={<ProfilePage />} />
                 <Route path="/users/password" element={<PasswordPage />} />
+                <Route path="/boards/list/:boardType" element={<BoardsListPage />} />
+                <Route path="/boards/view/:boardType/:boardId" element={<BoardsViewPage />} />
+                <Route path="/boards/edit/:boardType" element={<BoardsEditPage />} />
+                <Route path="/boards/edit/:boardType/:boardId" element={<BoardsEditPage />} />
             </Routes>
         </BrowserRouter>
     );

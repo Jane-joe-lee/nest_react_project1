@@ -1,10 +1,11 @@
 import {
     Body, Get, Post, Param, Patch, Delete, Controller, Query,
     ParseIntPipe, UploadedFiles, UseGuards, UseInterceptors, UsePipes, ValidationPipe
-} from '@nestjs/common'; // HttpStatus, MaxFileSizeValidator, ParseFilePipe, ParseFilePipeBuilder, FileTypeValidator, UploadedFile,UseFilters,
+} from '@nestjs/common';
 import { BoardsService } from "./boards.service";
 import { BoardStatus, BoardType } from "./boards.default_type";
 import { CreateBoardDto } from "./dto/create-board.dto";
+import { UpdateBoardDto } from "./dto/update-board.dto";
 import { SearchBoardDto } from "./dto/search-board.dto";
 import { BoardStatusValidationPipe } from "./pipes/board-status-validation.pipe";
 import { BoardTypeValidationPipe } from "./pipes/board-type-validation.pipe";
@@ -79,11 +80,11 @@ export class BoardsController {
     @UseGuards(AuthGuard())
     updateBoard(
         @Param('id', ParseIntPipe) id,
-        @Body() createBoardDto: CreateBoardDto,
+        @Body() updateBoardDto: UpdateBoardDto,
         @GetUser() user: User,
         @UploadedFiles() files: Array<Express.Multer.File>
     ): Promise<boolean> {
-        return this.boardsService.updateBoard(id, createBoardDto, user, 'boards', files);
+        return this.boardsService.updateBoard(id, updateBoardDto, user, 'boards', files);
     }
 
 

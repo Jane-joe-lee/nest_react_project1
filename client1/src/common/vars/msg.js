@@ -23,7 +23,17 @@ export const MSG_PW_CONFIRM_MSG = '비밀번호를 한번 더 입력해 주세�
 export const MSG_COMMON_FIXED = '수정되었습니다.';
 export const MSG_COMMON_DELETED = '삭제되었습니다.';
 export const MSG_COMMON_FAILED = '실패하였습니다. 다시 시도해주세요.';
+export const MSG_COMMON_SAVE = '추가되었습니다.';
 
 // 파일 관련
 export const MSG_COMMON_FILE_NO = '파일을 업로드해주세요.';
 export const MSG_COMMON_FILE_ONLYIMG = '이미지만 업로드 가능합니다.';
+
+// 게시판
+export const MSG_BBS_SEARCH_NOSELECT = '검색 조건을 선택해주세요.';
+export const MSG_BBS_SEARCH_NOENTER = '검색어를 입력해주세요.';
+export const MSG_BBS_NORESULT = '결과가 없습니다.';
+export const MSG_BBS_PRIVATE = '잠금 게시물은 작성자 본인만 열람할 수 있습니다.';
+export const MSG_BBS_EDIT_NOAUTH = '작성자 본인만 수정할 수 있습니다.';
+export const MSG_BBS_NOTITLE = '제목을 입력해주세요.';
+export const MSG_BBS_NODESCRIPTION = '내용을 입력해주세요.';

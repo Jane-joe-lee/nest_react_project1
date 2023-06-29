@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { BoardStatus, BoardType } from "./boards.default_type";
 import { CreateBoardDto } from "./dto/create-board.dto";
+import { UpdateBoardDto } from "./dto/update-board.dto";
 import { BoardRepository } from "./board.repository";
 import { Board } from "./board.entity";
 import { User } from "../auth/entity/user.entity";
@@ -37,8 +38,8 @@ export class BoardsService {
         return this.boardRepository.updateBoardLike(id, like);
     }
 
-    updateBoard(id: number, createBoardDto: CreateBoardDto, user: User, folder: string, files: Array<Express.Multer.File>): Promise<boolean> {
-        return this.boardRepository.updateBoard(id, createBoardDto, user, folder, files);
+    updateBoard(id: number, updateBoardDto: UpdateBoardDto, user: User, folder: string, files: Array<Express.Multer.File>): Promise<boolean> {
+        return this.boardRepository.updateBoard(id, updateBoardDto, user, folder, files);
     }
 
     getAllBoards(data: SearchBoardDto, type: BoardType): Promise<Board[]> {

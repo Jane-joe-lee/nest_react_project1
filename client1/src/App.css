@@ -51,3 +51,18 @@ header {
 .display_none {
   display: none;
 }
+
+div.table_list.title {
+  display: inline-block;
+  width: 300px;
+}
+div.table_list.title .title {
+  color: black;
+}
+div.table_list.title .icon {
+  margin-left: 5px;
+}
+div.table_list.title .replyCnt {
+  margin-left: 5px;
+  color: darkgreen;
+}

@@ -1,6 +1,7 @@
 import { DataSource, Repository } from "typeorm"; // EntityRepository,
 import { Board } from "./board.entity";
 import { CreateBoardDto } from "./dto/create-board.dto";
+import { UpdateBoardDto } from "./dto/update-board.dto";
 import { BoardStatus, BoardType } from "./boards.default_type";
 import { InjectRepository } from "@nestjs/typeorm";
 import { User } from "../auth/entity/user.entity";
@@ -40,7 +41,7 @@ export class BoardRepository extends Repository<Board> {
             .select(['board', 'user.username'])
             .where('board.id = :id', { id })
 
-        query.update().set({ hitCnt: () => 'hitCnt + 1' }).execute();
+        await query.update().set({ hitCnt: () => 'hitCnt + 1' }).execute(); // +1된 결과값을 받아오기 위해 await 추가
 
         const found = await query.getOne()
 
@@ -80,27 +81,37 @@ export class BoardRepository extends Repository<Board> {
     }
 
 
-    async updateBoard(id: number, createBoardDto: CreateBoardDto, user: User, folder: string, files: Array<Express.Multer.File>): Promise<boolean> {
+    async updateBoard(id: number, updateBoardDto: UpdateBoardDto, user: User, folder: string, files: Array<Express.Multer.File>): Promise<boolean> {
         const board = await this.getOnlyBoardById(id);
-        const { title, description, status } = createBoardDto;
+        const { title, description, status, oldFileNames } = updateBoardDto;
         board.title = title;
         board.description = description;
         board.status = status;
 
-        if ( files ) {
-            const new_files = files.map(item => folder + '/' + item.filename);
-            const filename = new_files.join('|');
-            //const filename = `${folder}/${file.filename}`;
-            board.attachedFile = filename;
+        // 수정시 기존 파일은 파일명만 boards/a.png|boards/b.png 형태로 받아옴. 기존 파일과 비교해서 삭제된것만 파일삭제
+        if ( oldFileNames ) {
+            if ( oldFileNames !== board.attachedFile ) { // 기존 첨부파일이 달라진 경우
 
-            //* 파일이 있을 경우 삭제
-            if ( board.attachedFile !== '' ) {
-                const tmpFiles = board.attachedFile.split('|');
-                for(const item of tmpFiles) {
-                    this.deleteFiles(item);
-                }
+                const attachedFiles = board.attachedFile.split('|'); // 기존 파일
+                const oldFiles = oldFileNames.split('|'); // 전달받은 파일명들. 여기서 없는 파일명은 기존 파일에서 삭제해줘야 함
+
+                const missingFiles = attachedFiles.filter((file) => !oldFiles.includes(file));
+
+                missingFiles.forEach((file) => {
+                    this.deleteFiles(file);
+                });
             }
         }
+
+        let filename;
+        // 새 파일 업로드
+        if ( files ) {
+            const new_files = files.map(item => folder + '/' + item.filename);
+            filename = new_files.join('|');
+        }
+
+        if ( oldFileNames ) filename = `${oldFileNames}|${filename}`;
+        board.attachedFile = filename;
 
         await this.save(board);
         return true;

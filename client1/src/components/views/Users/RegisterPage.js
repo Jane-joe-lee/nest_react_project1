@@ -11,11 +11,12 @@ import {
     MSG_LOGIN_PW_MSG,
     MSG_PW_CONFIRM_MSG
 } from "../../../common/vars/msg";
-import { getCookies } from "../../../common/cookie";
-import { COOKIE_JWT_NAME } from "../../../common/vars/vars";
 import HeaderPage from "../Nav/HeaderPage";
 import FooterPage from "../Nav/FooterPage";
 import { Button, Form, Input, Layout } from 'antd';
+import { getCookies } from "../../../common/cookie";
+import { COOKIE_JWT_NAME } from "../../../common/vars/vars";
+
 const { Content } = Layout;
 
 function RegisterPage(props) {
@@ -23,13 +24,12 @@ function RegisterPage(props) {
     const dispatch = useDispatch();
     const navigate = useNavigate();
 
-    // 이미 로그인된 경우 페이지 이동
     useEffect(() => {
         const x_auth = getCookies(COOKIE_JWT_NAME) ?? '';
-        if ( x_auth ) {
+        if (x_auth) {
             navigate("/");
         }
-    }, [navigate]);
+    }, []);
 
     // input box에 타이핑시 onChange 이벤트가 발생해 useState를 통해 값이 바뀌고 그걸 value에 넣어줌
     /*const [ username, setUserName ] = useState('');

@@ -1,8 +1,6 @@
 # nest_react_project1
 * nest.js, react로 만든 연습용 프로젝트
 
-* 게시판 기능 추가 예정
-
 ---
 
 ### 환경
@@ -21,10 +19,17 @@
 ---
 
 ### 기본 설명
+#### user
 * 로그인 : JWT -> cookie
 * 로그아웃
 * 마이페이지(프로필 이미지 업로드/수정, 비밀번호 변경)
 * 게시판 기능(예정)
+
+#### boards
+* 게시판, 게시물
+* 첨부파일 업로드, 다운로드, 미리보기(이미지)
+* 검색(제목, 작성자)
+* 댓글 기능은 추가하지 않음
 
 ---
 ### 환경설정
@@ -83,4 +88,16 @@ db:
   synchronize: false
 ```  
 
-  
+---
+### 수정해야 할 파일
+1) 게시판 유형 추가시 : boards.type ( notice, free )
+   1) src/boards/pipes/board-type-validation.pipe.ts
+   2) src/boards/boards.default_type.ts
+   3) client1/src/common/vars/vars.js : BoardsTypeOptions, BoardsTypeDefault
+2) 게시판 검색 조건 추가시 ( title, username )
+   1) src/boards/board.repository.ts
+   2) client1/src/common/vars/vars.js : BoardsSearchType, BoardsSearchDefault
+3) 게시판 공개여부
+   1) client1/src/common/vars/vars.js : BoardsStatus, BoardsStatusDefault
+   2) src/boards/boards.default_type.ts
+   3) src/boards/pipes/board-status-validation.pipe.ts
