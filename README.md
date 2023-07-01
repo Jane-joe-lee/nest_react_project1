@@ -104,5 +104,6 @@ db:
 
 ---
 ### 할것들
-- (react) _actions : async-await에서 then 불필요한듯
+- _actions : async-await에서 then 불필요
+- redux, dispatch check
 - 댓글 기능
