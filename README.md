@@ -101,3 +101,8 @@ db:
    1) client1/src/common/vars/vars.js : BoardsStatus, BoardsStatusDefault
    2) src/boards/boards.default_type.ts
    3) src/boards/pipes/board-status-validation.pipe.ts
+
+---
+### 할것들
+- (react) _actions : async-await에서 then 불필요한듯
+- 댓글 기능
