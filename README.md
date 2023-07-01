@@ -89,7 +89,7 @@ db:
 ```  
 
 ---
-### 수정해야 할 파일
+### 변경될 경우 수정해야 할 파일
 1) 게시판 유형 추가시 : boards.type ( notice, free )
    1) src/boards/pipes/board-type-validation.pipe.ts
    2) src/boards/boards.default_type.ts
@@ -107,3 +107,4 @@ db:
 - _actions : async-await에서 then 불필요
 - redux, dispatch check
 - 댓글 기능
+- JWT 만료시 처리, 만료시간 체크
