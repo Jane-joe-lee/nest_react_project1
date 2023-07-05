@@ -106,5 +106,11 @@ db:
 ### 할것들
 - _actions : async-await에서 then 불필요
 - redux, dispatch check
+  ( redux를 통해 (api, axios) 로그인하면 그 떄의 정보가 redux에 남아있어 useSelect 통해 재사용 가능 )
+```
+ import { useSelector } from 'react-redux';
+ ...
+ const user = useSelector(state => state.user);
+```
 - 댓글 기능
 - JWT 만료시 처리, 만료시간 체크
