@@ -103,7 +103,7 @@ db:
    3) src/boards/pipes/board-status-validation.pipe.ts
 
 ---
-### 할것들
+### To Do
 - _actions : async-await에서 then 불필요
 - redux, dispatch check
   ( redux를 통해 (api, axios) 로그인하면 그 떄의 정보가 redux에 남아있어 useSelect 통해 재사용 가능 )
@@ -114,3 +114,18 @@ db:
 ```
 - 댓글 기능
 - JWT 만료시 처리, 만료시간 체크
+- API 등을 통해 가져와서 useState 사용해 관리하는 경우, 정보 가져오기 전 랜더링 되어서 문제가 발생함.
+  아래와 같은 방법으로도 해결 가능
+```
+const [ Detail, setDetail ] = useState([]);
+...
+if ( Detail ) {
+   return (
+    <div>{Detail}</div>
+   );
+} else {
+    return (
+        <div> ...Loading </div>
+    );
+}
+```
